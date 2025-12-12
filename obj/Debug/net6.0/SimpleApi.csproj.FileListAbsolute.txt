@@ -32,3 +32,7 @@ C:\laragon\www\SimpleApi\bin\Debug\net6.0\Microsoft.EntityFrameworkCore.Relation
 C:\laragon\www\SimpleApi\bin\Debug\net6.0\Microsoft.Extensions.Caching.Memory.dll
 C:\laragon\www\SimpleApi\bin\Debug\net6.0\MySqlConnector.dll
 C:\laragon\www\SimpleApi\bin\Debug\net6.0\Pomelo.EntityFrameworkCore.MySql.dll
+C:\laragon\www\SimpleApi\bin\Debug\net6.0\appsettings.Production.json
+C:\laragon\www\SimpleApi\bin\Debug\net6.0\appsettings.Development.json
+C:\laragon\www\SimpleApi\bin\Debug\net6.0\DotNetEnv.dll
+C:\laragon\www\SimpleApi\bin\Debug\net6.0\Sprache.dll

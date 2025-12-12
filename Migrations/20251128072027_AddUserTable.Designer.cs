@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SimpleApi.Data;
 
@@ -10,9 +11,10 @@ using SimpleApi.Data;
 namespace SimpleApi.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251128072027_AddUserTable")]
+    partial class AddUserTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -35,12 +37,7 @@ namespace SimpleApi.Migrations
                     b.Property<DateTime>("Uptime")
                         .HasColumnType("datetime(6)");
 
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
-
                     b.HasKey("Id");
-
-                    b.HasIndex("UserId");
 
                     b.ToTable("HelloMessages");
                 });
@@ -68,40 +65,6 @@ namespace SimpleApi.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Users");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            Birthday = new DateTime(1992, 5, 10, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Name = "測試用戶",
-                            Phone = "0900111222",
-                            UpdatedAt = new DateTime(2025, 11, 28, 15, 0, 0, 0, DateTimeKind.Unspecified)
-                        },
-                        new
-                        {
-                            Id = 2,
-                            Birthday = new DateTime(1988, 4, 4, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Name = "行政助理",
-                            Phone = "0922333444",
-                            UpdatedAt = new DateTime(2025, 11, 28, 15, 0, 0, 0, DateTimeKind.Unspecified)
-                        });
-                });
-
-            modelBuilder.Entity("SimpleApi.Data.HelloMessage", b =>
-                {
-                    b.HasOne("SimpleApi.Data.User", "User")
-                        .WithMany("HelloMessages")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("SimpleApi.Data.User", b =>
-                {
-                    b.Navigation("HelloMessages");
                 });
 #pragma warning restore 612, 618
         }

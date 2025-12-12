@@ -1,25 +1,22 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SimpleApi.Data;
+using SimpleApi.Dtos.Requests;
+using SimpleApi.Services;
 
 namespace SimpleApi.Controllers;
-
-public class HelloRequest
-{
-    public string Name { get; set; } = string.Empty;
-
-    public int Age { get; set; }
-}
 
 [ApiController]
 [Route("[controller]")]
 public class HelloController : ControllerBase
 {
     private readonly AppDbContext _context;
+    private readonly IUserGreetingService _greetingService;
 
-    public HelloController(AppDbContext context)
+    public HelloController(AppDbContext context, IUserGreetingService greetingService)
     {
         _context = context;
+        _greetingService = greetingService;
     }
 
     [HttpGet]
@@ -46,6 +43,15 @@ public class HelloController : ControllerBase
         });
     }
 
+    [HttpGet("greet/{name}")]
+    public IActionResult GreetByService(string name)
+    {
+        return Ok(new
+        {
+            message = _greetingService.Greet(name)
+        });
+    }
+
     [HttpGet("time")]
     public IActionResult GetServerTime()
     {
@@ -56,13 +62,8 @@ public class HelloController : ControllerBase
     }
 
     [HttpPost("create")]
-    public IActionResult CreateHello([FromBody] HelloRequest request)
+    public IActionResult CreateHello([FromBody] HelloRequestDto request)
     {
-        if (string.IsNullOrWhiteSpace(request.Name))
-        {
-            return BadRequest(new { message = "Name 不可為空" });
-        }
-
         return Ok(new
         {
             message = $"你好，{request.Name}，你今年 {request.Age} 歲，這是來自 POST API 的訊息！"
@@ -92,7 +93,7 @@ public class HelloController : ControllerBase
     }
 
     [HttpPost("from-body")]
-    public IActionResult FromBody([FromBody] HelloRequest request)
+    public IActionResult FromBody([FromBody] HelloRequestDto request)
     {
         return Ok(new
         {
@@ -120,13 +121,8 @@ public class HelloController : ControllerBase
     }
 
     [HttpPost("messages")]
-    public async Task<IActionResult> CreateMessage([FromBody] HelloRequest request)
+    public async Task<IActionResult> CreateMessage([FromBody] HelloRequestDto request)
     {
-        if (string.IsNullOrWhiteSpace(request.Name))
-        {
-            return BadRequest(new { message = "Name 不可為空" });
-        }
-
         var message = new HelloMessage
         {
             Content = $"{request.Name} ({request.Age} 歲) 來自當前時間 {DateTime.UtcNow:yyyy-MM-dd HH:mm:ss}",

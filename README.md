@@ -28,6 +28,19 @@
    ```
 5. 開啟 Swagger UI：`http://localhost:5000/swagger`。
 
+### 環境配置（appsettings + 環境變數）
+1. `appsettings.json` 提供共用設定，`appsettings.Development.json`、`appsettings.Production.json` 會根據 `ASPNETCORE_ENVIRONMENT` 決定是否套用，建議在開發機輸入 `dotnet run --environment Development`、正式部署時設定 `ASPNETCORE_ENVIRONMENT=Production`。
+2. 若需要覆寫某些欄位（像 connection string、Redis、外部 API key），可以把對應鍵用系統環境變數（範例：`ConnectionStrings__DefaultConnection`、`Redis__Configuration`）設定在主機或 CI/CD pipeline，`builder.Configuration` 會自動把這些放到最前面。
+3. 任何時候都應保持 `appsettings.{Environment}.json` 只放非敏感預設值，敏感資訊由環境變數注入，確保 repository 不存密碼。
+
+## 環境檢查清單
+| 步驟 | 說明 | 驗證 |
+| --- | --- | --- |
+| 1. 確認準備的環境 | 開發時 `dotnet run --environment Development`，正式時設定 `ASPNETCORE_ENVIRONMENT=Production` | 用 `dotnet run --environment Development`/`dotnet run --environment Production`，觀察 log 中 `Application started` 的環境名稱。`
+| 2. 檢視 connection string | 確定 `appsettings.Development.json` 與 `appsettings.Production.json` 有對應 `ConnectionStrings:DefaultConnection`，必要時再用 env 變數覆蓋 | 透過 `builder.Configuration.GetConnectionString("DefaultConnection")` 在程式中 log 出或暫時加 `Console.WriteLine`，確認讀到的字串。`
+| 3. 確保安全 | 正式機不放 `.env`，只用平台環境變數與 `appsettings.Production.json` 的安全預設 | 查看部署環境的 `ASPNETCORE_ENVIRONMENT`、`ConnectionStrings__DefaultConnection` 變數是否存在（Windows 的 `set`、Linux 的 `printenv`）。`
+
+
 ## 目前可用的 endpoint
 | Method | Route | 說明 |
 | --- | --- | --- |
