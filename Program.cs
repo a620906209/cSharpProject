@@ -17,11 +17,12 @@ builder.Services.AddApplicationServices(builder.Configuration);
 
 var app = builder.Build();
 
-DbInitializer.Initialize(app.Services);
+
 
 // 設定 HTTP 請求管線
 if (app.Environment.IsDevelopment())
 {
+    DbInitializer.Initialize(app.Services);
     app.UseSwagger();
     app.UseSwaggerUI();
 }
