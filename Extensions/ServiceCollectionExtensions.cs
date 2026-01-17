@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OpenApi.Models;
@@ -15,7 +16,26 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddApplicationServices(this IServiceCollection services, IConfiguration configuration)
     {
         // MVC 與 Swagger
-        services.AddControllers();
+        services.AddControllers()
+            .ConfigureApiBehaviorOptions(options =>
+            {
+                options.InvalidModelStateResponseFactory = context =>
+                {
+                    var problemDetails = new ValidationProblemDetails(context.ModelState)
+                    {
+                        Title = "參數驗證失敗",
+                        Status = StatusCodes.Status400BadRequest,
+                        Instance = context.HttpContext.Request.Path
+                    };
+
+                    problemDetails.Extensions["traceId"] = context.HttpContext.TraceIdentifier;
+
+                    return new BadRequestObjectResult(problemDetails)
+                    {
+                        ContentTypes = { "application/problem+json" }
+                    };
+                };
+            });
         services.AddEndpointsApiExplorer();
         services.AddSwaggerGen(options =>
         {
@@ -36,6 +56,7 @@ public static class ServiceCollectionExtensions
 
         // 自訂 service
         services.AddScoped<IUserGreetingService, UserGreetingService>();
+        services.AddScoped<IUserService, UserService>();
         services.AddScoped<IUserRepository, UserRepository>();
 
         return services;

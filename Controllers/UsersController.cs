@@ -1,8 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using SimpleApi.Dtos.Requests;
-using SimpleApi.Repositories;
 using SimpleApi.Data;
+using SimpleApi.Services;
 
 namespace SimpleApi.Controllers;
 
@@ -10,26 +9,24 @@ namespace SimpleApi.Controllers;
 [Route("[controller]")]
 public class UsersController : ControllerBase
 {
-    private readonly IUserRepository _repository;
-    private readonly AppDbContext _context;
+    private readonly IUserService _service;
 
-    public UsersController(IUserRepository repository, AppDbContext context)
+    public UsersController(IUserService service)
     {
-        _repository = repository;
-        _context = context;
+        _service = service;
     }
 
     [HttpGet]
     public async Task<IActionResult> GetAll()
     {
-        var users = await _repository.GetAllAsync();
+        var users = await _service.GetAllAsync();
         return Ok(users);
     }
 
     [HttpGet("{id:int}/id")]
     public async Task<IActionResult> GetById(int id)
     {
-        var user = await _repository.GetByIdAsync(id);
+        var user = await _service.GetByIdAsync(id);
         if (user is null)
         {
             return NotFound();
@@ -40,47 +37,33 @@ public class UsersController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] CreateUserRequestDto request)
     {
-        var user = new User
-        {
-            Name = request.Name,
-            Phone = request.Phone,
-            Birthday = request.Birthday ?? default,
-            UpdatedAt = DateTime.UtcNow
-        };
-
-        await _repository.AddAsync(user);
+        var user = await _service.CreateAsync(request);
         return CreatedAtAction(nameof(GetById), new { id = user.Id }, user);
     }
 
     [HttpGet("{id:int}/messages")]
     public async Task<IActionResult> GetMessagesByUser(int id)
     {
-        var userExists = await _repository.GetByIdAsync(id);
+        var userExists = await _service.GetByIdAsync(id);
         if (userExists is null)
         {
             return NotFound(new { message = $"找不到 Id = {id} 的使用者" });
         }
 
-        var messages = await _context.HelloMessages
-            .Where(m => m.UserId == id)
-            .OrderByDescending(m => m.CreatedAt)
-            .Select(m => new
-            {
-                m.Id,
-                m.Content,
-                m.CreatedAt
-            })
-            .ToListAsync();
+        var messages = await _service.GetMessagesByUserAsync(id);
 
-        return Ok(messages);
+        return Ok(messages.Select(m => new
+        {
+            m.Id,
+            m.Content,
+            m.CreatedAt
+        }));
     }
 
     [HttpGet("{id:int}/with-messages")]
     public async Task<IActionResult> GetUserWithMessages(int id)
     {
-        var user = await _context.Users
-            .Include(u => u.HelloMessages)
-            .FirstOrDefaultAsync(u => u.Id == id);
+        var user = await _service.GetUserWithMessagesAsync(id);
 
         if (user is null)
         {
@@ -113,7 +96,7 @@ public class UsersController : ControllerBase
             return BadRequest(new { message = "必須提供搜尋關鍵字" });
         }
 
-        var users = await _repository.SearchByNameAsync(term);
+        var users = await _service.SearchByNameAsync(term);
         return Ok(users);
     }
 }

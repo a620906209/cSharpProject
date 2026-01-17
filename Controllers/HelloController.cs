@@ -21,8 +21,15 @@ public class HelloController : ControllerBase
 
     [HttpGet]
     public IActionResult Get()
-    {
-        return Ok(new { message = "你好，這是來自 C# API 的訊息" });
+    {   
+        double[] d = new double[] {1.1, 2.2, 3.3};
+        double[] e = d[0] < 1 ? new[] {d[0], d[1]} : new[] {d[1], d[0]};
+        double j = d[0] + 1.1;
+        int a = 1;
+        int b = 2;
+        var c ="tes1t";
+        return Ok(new {message = "你11111111好，這是來自 C1# API 的訊息", a, b, c, e, j });
+        // return Ok(new { message = "你11111111好，這是來自 C1# API 的訊息" });
     }
 
     [HttpGet("{name}")]

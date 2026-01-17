@@ -37,4 +37,19 @@ public class UserRepository : IUserRepository
             .OrderBy(u => u.Name)
             .ToListAsync();
     }
+
+    public async Task<IReadOnlyList<HelloMessage>> GetMessagesByUserAsync(int userId)
+    {
+        return await _context.HelloMessages
+            .Where(m => m.UserId == userId)
+            .OrderByDescending(m => m.CreatedAt)
+            .ToListAsync();
+    }
+
+    public async Task<User?> GetUserWithMessagesAsync(int userId)
+    {
+        return await _context.Users
+            .Include(u => u.HelloMessages)
+            .FirstOrDefaultAsync(u => u.Id == userId);
+    }
 }
